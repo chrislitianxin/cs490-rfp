@@ -14,16 +14,27 @@ app = Flask(__name__)
 
 CORS(app)
 
-config = {
+config_RFP = {
     "apiKey": "apiKey",
     "authDomain": "potato",
     "databaseURL": "https://cs490-5eacc.firebaseio.com",
     "storageBucket": "potatotwo",
 }
 
-# fb = Firebase(config)
-fb = pyrebase.initialize_app(config)
+config_HR = {
+    "apiKey": "AIzaSyCNkrsI8P9HH63yxZSDmvAEL4-vu6c8wl0",
+    "authDomain": "recruitment-6cae5.firebaseapp.com",
+    "databaseURL": "https://recruitment-6cae5.firebaseio.com",
+    "projectId": "recruitment-6cae5",
+    "storageBucket": "recruitment-6cae5.appspot.com",
+    "messagingSenderId": "307067666683",
+    "appId": "1:307067666683:web:39e93a69988eacbc"
+}
 
+#fb = Firebase(config)
+fb = pyrebase.initialize_app(config_RFP)
+
+fb_hr = pyrebase.initialize_app(config_HR)
 
 # configs
 crm_config = {
@@ -378,6 +389,24 @@ def create_client(name):
     else:
         return 'blah'
 
+#######################################################################################################################
+# This will let us retrieve consultant information
+@app.route('/consultants', methods=['GET'])
+def get_consultant_info():
+    db = fb_hr.database()
+
+    db_entry = db.child("employees").get()
+    count = 0
+    returnVal = ""
+
+    for e in db_entry.each():
+        returnVal += e.val()["name"] + "," + e.val()["salary"] + ","
+        count += 1
+
+    returnVal = str(count) + "," + returnVal
+    return returnVal
+    # return db_entry.val()
+#######################################################################################################################
 
 # This was meant to be used to transition a tender from active to historical
 # @app.route('/tenders/move', methods=['GET'])
@@ -397,6 +426,7 @@ def create_client(name):
 #         return db_entry.val()
 #     else:
 #         return "Request error"
+
 
 if __name__ == '__main__':
     # app.run(host='0.0.0.0', port=5000, debug=True)

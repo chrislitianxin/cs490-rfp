@@ -414,30 +414,39 @@ def get_consultant_info():
     return returnVal
     # return db_entry.val()
 #######################################################################################################################
-# This will let us retrieve consultant information
+# This will let us retrieve client information
 @app.route('/clients', methods=['GET'])
 def get_clients_name():
     return jsonify(crm_fb.get_all_clients_info())
+#######################################################################################################################
 
+#######################################################################################################################
+#Transition from Historical to Active
+@app.route('/tenders/move', methods=['GET'])
+def tender_active_to_historical():
+    search_text = request.args.get('search', None)
+    db = fb.database()
 
-# This was meant to be used to transition a tender from active to historical
-# @app.route('/tenders/move', methods=['GET'])
-# def tender_active_to_historical():
-#     client_name = request.args.get('name', None)
-#     db = fb.database()
+    #Get the existing active tender
+    db_entry = db.child("tenders").child("historical").order_by_child("tender_id").equal_to(search_text).get()
 
-#     #Get the existing active tender
-#     db_entry = db.child("tenders").child("active").child(client_name).get()
+    if db_entry is not None:
+        #Create a database entry for the tender under active node
+        db.child("tenders").child("active").push(db_entry.each()[0].val())
 
-#     if db_entry is not None:
-#         #Create a database entry for the tender under historical node
-#         db.child("tenders").child("historical").child(client_name).set(db_entry.val())
+        #Delete the existing historical tender
+        db.child("tenders").child("historical").child(db_entry.each()[0].key()).remove()
+        #return db_entry.val()
+        return db_entry.each()[0].val()
+    else:
+        return "Request error"
+#######################################################################################################################
 
-#         #Delete the existing active tender
-#         db.child("tenders").child("active").child(client_name).remove()
-#         return db_entry.val()
-#     else:
-#         return "Request error"
+@app.route('/cosmin', methods=['POST'])
+def cosmin_test():
+    req = request.json
+
+    print(req)
 
 
 if __name__ == '__main__':

@@ -1,5 +1,6 @@
 """ This is for integration with CRM's firebase """
 import pyrebase
+import flask
 
 """ Added rules for query -> for CRM team 
 {
@@ -45,3 +46,24 @@ class CRM(object):
 
         except IndexError as err:
             return 'Record Empty: ' + err
+
+    def add_new_client(self, name):
+        "Add new client, post to CRM database"
+        db = self.crm.database()
+        req = {
+            "Category ": "Welfare",
+            "Contact Details": "647-378-4809",
+            "Date Joined": "01/04/2019",
+            "Main Contact Name": "Blah Ablah",
+            "Name": name,
+            "Province": "ON",
+            "Size": "123",
+            "Total Assets": "123456",
+            "Total Tax Receipted Gifts": "247140"
+        }
+
+        try:
+            return db.child("clients").push(req)
+
+        except Exception as err:
+            return err

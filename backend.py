@@ -368,6 +368,17 @@ def retrain():
     return None
 
 
+""" Trigger retrain of our model """
+@app.route('/crm/add_client/<name>', methods=['GET', 'POST'])
+def create_client(name):
+    req = request.json
+
+    if request.method == 'POST':
+        return crm_fb.add_new_client(name)
+    else:
+        return 'blah'
+
+
 # This was meant to be used to transition a tender from active to historical
 # @app.route('/tenders/move', methods=['GET'])
 # def tender_active_to_historical():

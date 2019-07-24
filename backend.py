@@ -370,20 +370,17 @@ def pred_tender_acceptance():
 
 
 """ Trigger retrain of our model """
+# VOID FUNCTION
 @app.route('/model/retrain', methods=['GET'])
 def retrain():
-    pass
+    # get historical records
+    db = fb.database()
+    historical = db.child("tenders").child("historical").get().val().items()
 
-    # # get historical records
-    # db = fb.database()
-    # historical = db.child("tenders").child("historical").get().val().items()
+    # get all clients info
+    clients = crm_fb.get_all_clients_info()
 
-    # # get all clients info
-    # clients = crm_fb.get_all_clients_info()
-
-    # model.retrain_model(historical, clients)
-
-    return None
+    model.retrain_model(historical, clients)
 
 
 """ Trigger retrain of our model """
@@ -421,26 +418,29 @@ def get_clients_name():
 #######################################################################################################################
 
 #######################################################################################################################
-#Transition from Historical to Active
+# Transition from Historical to Active
 @app.route('/tenders/move', methods=['GET'])
 def tender_active_to_historical():
     search_text = request.args.get('search', None)
     db = fb.database()
 
-    #Get the existing active tender
-    db_entry = db.child("tenders").child("historical").order_by_child("tender_id").equal_to(search_text).get()
+    # Get the existing active tender
+    db_entry = db.child("tenders").child("historical").order_by_child(
+        "tender_id").equal_to(search_text).get()
 
     if db_entry is not None:
-        #Create a database entry for the tender under active node
+        # Create a database entry for the tender under active node
         db.child("tenders").child("active").push(db_entry.each()[0].val())
 
-        #Delete the existing historical tender
-        db.child("tenders").child("historical").child(db_entry.each()[0].key()).remove()
-        #return db_entry.val()
+        # Delete the existing historical tender
+        db.child("tenders").child("historical").child(
+            db_entry.each()[0].key()).remove()
+        # return db_entry.val()
         return db_entry.each()[0].val()
     else:
         return "Request error"
 #######################################################################################################################
+
 
 @app.route('/cosmin', methods=['POST'])
 def cosmin_test():

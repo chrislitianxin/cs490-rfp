@@ -5,6 +5,16 @@ from sklearn.model_selection import train_test_split
 from sklearn import preprocessing, decomposition, model_selection, metrics, pipeline
 from sklearn.metrics import log_loss
 from flask import jsonify
+import itertools
+
+
+""" HELPER FUNCTION
+"""
+
+
+def flatmap(func, iterable):
+    "Flatmap implemented using itertools"
+    return list(itertools.chain.from_iterable(iterable))
 
 
 class Model(object):
@@ -20,7 +30,7 @@ class Model(object):
         "run prediction algo and return the probability based on client info and tender info"
         company_assets = int(client_info["Total Assets"])
         company_size = int(client_info["Size"])
-        #rfp_price = rfp_info["price"]
+        # rfp_price = rfp_info["price"]
         rfp_num_consultants = len(rfp_info["consultants"])
         # TODO
         cost = 10000
@@ -29,9 +39,9 @@ class Model(object):
         # features for prediction
         features = [[company_assets, company_size, rfp_num_consultants,
                      cost, m/100, cost * (1+m/100)] for m in range(0, 100, 1)]
-        prob = self.model.predict_proba(features)[..., :1]
+        prob = self.model.predict_proba(features)[..., :1].tolist()
         # flatten the list
-        prob = sum(prob.tolist(), [])
+        prob = flatmap(list.__add__, prob)
 
         return jsonify(prob)
 

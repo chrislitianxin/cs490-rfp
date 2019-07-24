@@ -20,6 +20,7 @@ API endpoint to retrieve all historical tenders
 
 ### /tenders/active/update_status
 API endpoint to update status for an existing tender. 
+
 **Params:** `id` `status`
 
 ### /clients
@@ -29,5 +30,6 @@ Get list of clients
 Get list of consultants
 
 ### /tenders/pred
-Get prediction on probability of tender accepted for profit margin in range `[0,100]`, pass in the tender id 
+Get prediction on probability of tender accepted for profit margin in range `[0,100]`, pass in the tender id. 
+
 **Params:** `id`

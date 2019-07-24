@@ -451,6 +451,11 @@ def tender_active_to_historical():
 @app.route('/cosmin', methods=['POST'])
 def cosmin_test():
     req = request.json
+    print(req)
+    #req = request.form.to_dict(flat=False)
+    db = fb.database()
+ 
+    db.child("tenders").child("active").push(req)
 
     return jsonify(req)
 #######################################################################################################################

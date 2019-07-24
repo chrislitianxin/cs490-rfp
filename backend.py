@@ -108,10 +108,6 @@ def help_page():
 # API endpoint to retrieve all active tenders
 @app.route('/tenders/active', methods=['GET'])
 def get_active_tenders():
-    # database = firebase.FirebaseApplication('https://cs490-5eacc.firebaseio.com', None)
-    # result = database.get('/tenders/active', None,)
-    # ret = json.dumps(result, indent=4, sort_keys=True)
-
     db = fb.database()
     result = db.child("tenders").child("active").get()
 
@@ -123,10 +119,6 @@ def get_active_tenders():
 # API endpoint to retrieve all historical tenders
 @app.route('/tenders/historical', methods=['GET'])
 def get_historical_tenders():
-    # database = Firebase.FirebaseApplication('https://cs490-5eacc.firebaseio.com', None)
-    # result = database.get('/tenders/historical', None,)
-    # ret = json.dumps(result, indent=4, sort_keys=True)
-
     db = fb.database()
     result = db.child("tenders").child("historical").get()
 
@@ -292,8 +284,6 @@ def update_tender_status():
 @app.route('/tenders/query', methods=['GET'])
 def query():
     search_text = request.args.get('search', None)
-    # client_name = request.args.get('name', None)
-    # tender_id = request.args.get('id', None)
     if search_text is None:
         return "BAD QUERY"
 
@@ -311,7 +301,6 @@ def query():
             activeQuery = db.child("tenders").child("active").order_by_child(
                 "tender_id").equal_to(search_text).get()
         # need this to force an IndexError if no tenders were found
-        print(activeQuery.val())
         returnVal += json.dumps(activeQuery.val())
     except IndexError as e:
         # if we get index error then there were no entries with that name
@@ -327,8 +316,6 @@ def query():
             historicalQuery = db.child("tenders").child(
                 "historical").order_by_child("tender_id").equal_to(search_text).get()
         # need this to force an IndexError if no tenders were found
-        print(historicalQuery.val())
-        returnVal += "\n \n"
         returnVal += json.dumps(historicalQuery.val())
     except IndexError as e:
         # if we get index error then there were no entries with that name
@@ -338,6 +325,13 @@ def query():
     # Check if no results exist
     if not activeResultExists and not historicalResultExists:
         returnVal = "NO RESULTS"
+
+    # If there are entries in both active and historical tenders, get the respective orderedDict objects and merge them
+    if activeResultExists and historicalResultExists:
+        a = activeQuery.val()
+        b = historicalQuery.val()
+        a.update(b)
+        return json.dumps(a)
 
     return returnVal
 #######################################################################################################################

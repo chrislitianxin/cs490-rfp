@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
-from flask import request
+from flask import request, jsonify
 # from firebase import Firebase
 import pyrebase
 import json
@@ -94,7 +94,14 @@ def help_page():
     <h3>/tenders/historical</h3> \
         <p>API endpoint to retrieve all historical tenders</p> \
     <h3>/tenders/active/update_status</h3> \
-        <p>API endpoint to update status for an existing tender. <br> Params: id   status</p>'
+        <p>API endpoint to update status for an existing tender. <br> Params: id   status</p> \
+    <h3>/clients</h3> \
+        <p>Get list of clients</p> \
+    <h3>/consultants</h3> \
+        <p>Get list of consultants</p> \
+    <h3>/tenders/pred</h3> \
+        <p>Get prediction on probability of tender accepted for profit margin in range [0,100], pass in the tender id \
+            <br> Params: id </p>'
 
 
 #######################################################################################################################
@@ -356,8 +363,8 @@ def pred_tender_acceptance():
     prob = model.pred_probability(client_info, rfp_info)
 
     # update record probability
-    db.child("tenders").child("active").child(
-        rfp_key).update({"prob_accept": prob})
+    # db.child("tenders").child("active").child(
+    #     rfp_key).update({"prob_accept": prob})
 
     return prob
 
@@ -407,6 +414,11 @@ def get_consultant_info():
     return returnVal
     # return db_entry.val()
 #######################################################################################################################
+# This will let us retrieve consultant information
+@app.route('/clients', methods=['GET'])
+def get_clients_name():
+    return jsonify(crm_fb.get_all_clients_info())
+
 
 # This was meant to be used to transition a tender from active to historical
 # @app.route('/tenders/move', methods=['GET'])

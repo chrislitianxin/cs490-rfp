@@ -43,11 +43,12 @@ class CRM(object):
     def get_all_clients_info(self):
         "Get all clients info"
         db = self.crm.database()
-
         try:
             # query crm db for client infomation
             clients = db.child("clients").get().val()
-            return clients
+            client_list = [client['Name'] for _, client in clients.items()]
+
+            return client_list
 
         except IndexError as err:
             return 'Record Empty: ' + err

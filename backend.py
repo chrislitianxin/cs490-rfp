@@ -392,24 +392,34 @@ def create_client(name):
         return crm_fb.add_new_client(name)
     else:
         return 'blah'
+#######################################################################################################################
 
 #######################################################################################################################
 # This will let us retrieve consultant information
 @app.route('/consultants', methods=['GET'])
-def get_consultant_info():
+def get_consultants():
+    roleDict = {}
     db = fb_hr.database()
+    role_db = db.child("roles").get()
 
-    db_entry = db.child("employees").get()
+    for e in role_db.each():
+        roleDict[str(e.key())] = e.val()
+
+    emp_db = db.child("employees").get()
     count = 0
     returnVal = ""
 
-    for e in db_entry.each():
-        returnVal += e.val()["name"] + "," + e.val()["salary"] + ","
-        count += 1
+    for e in emp_db.each():
+        role = e.val()["role"]
+        if role in roleDict:
+            #if employee role is consulting, add employee to list of consultants
+            if roleDict[role]['department'] == 'Contracting':
+                returnVal += e.val()["name"] + ","
+                count += 1
 
-    returnVal = str(count) + "," + returnVal
     return returnVal
-    # return db_entry.val()
+#######################################################################################################################
+
 #######################################################################################################################
 # This will let us retrieve client information
 @app.route('/clients', methods=['GET'])
@@ -441,12 +451,13 @@ def tender_active_to_historical():
         return "Request error"
 #######################################################################################################################
 
-
+#######################################################################################################################
 @app.route('/cosmin', methods=['POST'])
 def cosmin_test():
     req = request.json
 
     print(req)
+#######################################################################################################################
 
 
 if __name__ == '__main__':

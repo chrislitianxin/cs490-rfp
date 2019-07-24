@@ -33,7 +33,12 @@ class CRM(object):
             return client_info
 
         except IndexError as err:
-            return 'ClientNotFound'
+            return self.get_default_client_info()
+
+    def get_default_client_info(self):
+        _, client = self.crm.database().child("clients").order_by_child(
+            "Name").equal_to('rfp-test').get().val().popitem(last=False)
+        return client
 
     def get_all_clients_info(self):
         "Get all clients info"

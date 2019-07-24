@@ -348,7 +348,7 @@ def pred_tender_acceptance():
     # get rfp info
     rfp_key, rfp_info = db.child("tenders").child("active").order_by_child(
         "tender_id").equal_to(rfp_id).get().val().popitem(last=False)
-
+    print(rfp_info['consultants'])
     # get client info
     client_name = rfp_info['client_name']
     client_info = crm_fb.get_client_info(client_name)

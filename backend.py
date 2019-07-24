@@ -460,7 +460,8 @@ def cosmin_test():
 def trendline():
     tl = [(random.randrange(5, 10)*i, random.randrange(5, 10) * i)
           for i in range(12)]
-    return jsonify(tl)
+    res = list(zip(*tl))
+    return jsonify(res)
 
 
 if __name__ == '__main__':

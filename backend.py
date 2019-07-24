@@ -456,7 +456,7 @@ def tender_active_to_historical():
 def cosmin_test():
     req = request.json
 
-    print(req)
+    return jsonify(req)
 #######################################################################################################################
 
 

@@ -9,6 +9,8 @@ import uuid
 
 from crm import CRM
 from model import Model
+import random
+
 
 app = Flask(__name__)
 
@@ -406,7 +408,7 @@ def get_consultants():
     for e in emp_db.each():
         role = e.val()["role"]
         if role in roleDict:
-            #if employee role is consulting, add employee to list of consultants
+            # if employee role is consulting, add employee to list of consultants
             if roleDict[role]['department'] == 'Contracting':
                 returnVal += e.val()["name"] + ","
                 count += 1
@@ -452,6 +454,13 @@ def cosmin_test():
 
     return jsonify(req)
 #######################################################################################################################
+
+
+@app.route('/trendline', methods=['GET'])
+def trendline():
+    tl = [(random.randrange(5, 10)*i, random.randrange(5, 10) * i)
+          for i in range(12)]
+    return jsonify(tl)
 
 
 if __name__ == '__main__':

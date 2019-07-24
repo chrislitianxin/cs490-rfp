@@ -83,7 +83,7 @@ def help_page():
     <h3>/tenders/historical</h3> \
         <p>API endpoint to retrieve all historical tenders</p> \
     <h3>/tenders/active/update_status</h3> \
-        <p>API endpoint to update status for an existing tender. <br> Params: client_name   status</p>'
+        <p>API endpoint to update status for an existing tender. <br> Params: id   status</p>'
 
 
 #######################################################################################################################

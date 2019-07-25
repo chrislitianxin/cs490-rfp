@@ -101,9 +101,15 @@ def help_page():
         <p>Get list of clients</p> \
     <h3>/consultants</h3> \
         <p>Get list of consultants</p> \
-    <h3>/tenders/pred</h3> \
+            <h3>/tenders/save</h3> \
+        <p>Save the current tender, pass in the uuid</p> \
+            <h3>/tenders/get</h3> \
+        <p>Get whatever field you need from a tender. Param: uuid field</p> \
+            <h3>/trendline</h3> \
+        <p>Get trendline</p> \
+    <h3>/tenders/predict</h3> \
         <p>Get prediction on probability of tender accepted for profit margin in range [0,100], pass in the tender id \
-            <br> Params: id </p>'
+            <br> Params: uuid </p>'
 
 
 #######################################################################################################################

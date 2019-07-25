@@ -521,7 +521,7 @@ def get_cost(consultantsList, expenseList):
     print("get_cost: consultantCost = ", consultantCost)
     totalCost += consultantCost
     
-    return str(totalCost)
+    return totalCost
 #######################################################################################################################
 
 

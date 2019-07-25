@@ -136,19 +136,22 @@ def add_tender():
     # Get necessary tender parameters
     client_name = request.args.get('name', None)
     consultants = request.args.get('consultants', None)
-    contact_email = request.args.get('contact_email', None)
-    contact_name = request.args.get('contact_name', None)
-    currency = request.args.get('currency', None)
-    date_due = request.args.get('date_due', None)
-    date_received = request.args.get('date_rec', None)
-    location_city = request.args.get('city', None)
-    location_country = request.args.get('country', None)
-    location_region = request.args.get('region', None)
-    price = request.args.get('price', None)
-    probability_accepted = request.args.get('prob_accept', None)
+    expenses = request.args.get('expenses', None)
+    #contact_email = request.args.get('contact_email', None)
+    #contact_name = request.args.get('contact_name', None)
+    #currency = request.args.get('currency', None)
+    #date_due = request.args.get('date_due', None)
+    #date_received = request.args.get('date_rec', None)
+    #location_city = request.args.get('city', None)
+    #location_country = request.args.get('country', None)
+    #location_region = request.args.get('region', None)
+    #price = request.args.get('price', None)
+    #probability_accepted = request.args.get('prob_accept', None)
+    status = request.args.get('status', None)
 
     # Get values based on date and time
     d = datetime.datetime.today()
+    newDate = d + datetime.timedelta(days=21)
     # tender_id = d.strftime('%Y%m%d-%H%M%S%f')
     tender_id = "RFP-" + str(uuid.uuid4())[0:5]
 
@@ -156,29 +159,31 @@ def add_tender():
     entry = {}
     entry['client_name'] = client_name
     # Add consultants
-    entry['consultants'] = {}
-    cons = consultants.split(',')
-    counter = 0
-    for c in cons:
-        if counter == 0:
-            entry['consultants']['lead'] = c
-        else:
-            entry['consultants']['member' + str(counter)] = c
-        counter += 1
-    entry['contact'] = {}
-    entry['contact']['email'] = contact_email
-    entry['contact']['name'] = contact_name
-    entry['currency'] = currency
+    entry['consultants'] = consultants
+    entry['cost'] = get_cost(consultants, expenses)
+    # cons = consultants.split(',')
+    # counter = 0
+    # for c in cons:
+    #     if counter == 0:
+    #         entry['consultants']['lead'] = c
+    #     else:
+    #         entry['consultants']['member' + str(counter)] = c
+    #     counter += 1
+    #entry['contact'] = 
+    #entry['contact']['email'] = contact_email
+    #entry['contact']['name'] = contact_name
+    #entry['currency'] = currency
     entry['date_accessed'] = d.strftime('%m-%d-%Y')  # datetime.date.today()
-    entry['date_due'] = date_due
-    entry['date_received'] = date_received
-    entry['location'] = {}
-    entry['location']['city'] = location_city
-    entry['location']['country'] = location_country
-    entry['location']['region'] = location_region
-    entry['price'] = int(price)
-    entry['prob_accept'] = float(probability_accepted)
-    entry['status'] = "new"
+    entry['date_due'] = newDate.strftime('%m-%d-%Y')
+    entry['date_received'] = d.strftime('%m-%d-%Y')
+    entry['expenses'] = expenses
+    #entry['location'] = {}
+    #entry['location']['city'] = location_city
+    #entry['location']['country'] = location_country
+    #entry['location']['region'] = location_region
+    entry['price'] = -1
+    entry['prob_accept'] = -1
+    entry['status'] = status
     entry['tender_id'] = tender_id
 
     db = fb.database()
@@ -188,8 +193,7 @@ def add_tender():
     # Push entry to database and let Firebase create random unique key
     result = db.child("tenders").child("active").push(entry)
 
-    # print(result.val())
-    return result
+    return result['name']
 #######################################################################################################################
 
 #######################################################################################################################
@@ -240,6 +244,7 @@ def delete_tender(tender_id=None):
     return "No Entry Found - DELETE FAILED"
 #######################################################################################################################
 
+#######################################################################################################################
 # API endpoint to update status for an existing tender
 # EXAMPLE: http://limitless-hollows-30605.herokuapp.com/tenders/active/update_status?id=RFP-12345&status=approved"
 @app.route('/tenders/active/update_status', methods=['GET'])
@@ -280,6 +285,7 @@ def update_tender_status():
         # 1. Only supports approved / rejected status update.
         # 2. if client_name does not exists, it will update a None client, will not add clutter to database
         return "Nothing updated."
+#######################################################################################################################
 
 #######################################################################################################################
 # API endpoint to query the database based on client name OR tender id
@@ -338,7 +344,7 @@ def query():
     return returnVal
 #######################################################################################################################
 
-
+#######################################################################################################################
 """ API endpoint to get a inference on probability of tender acceptance """
 @app.route('/tenders/predict', methods=['GET'])
 def pred_tender_acceptance():
@@ -363,8 +369,9 @@ def pred_tender_acceptance():
     #     rfp_key).update({"prob_accept": prob})
 
     return prob
+#######################################################################################################################
 
-
+#######################################################################################################################
 """ Trigger retrain of our model """
 # VOID FUNCTION
 @app.route('/model/retrain', methods=['GET'])
@@ -377,8 +384,9 @@ def retrain():
     clients = crm_fb.get_all_clients_info()
 
     model.retrain_model(historical, clients)
+#######################################################################################################################
 
-
+#######################################################################################################################
 """ Trigger retrain of our model """
 @app.route('/crm/add_client/<name>', methods=['GET', 'POST'])
 def create_client(name):
@@ -459,6 +467,59 @@ def cosmin_test():
 
     return jsonify(req)
 #######################################################################################################################
+
+
+#######################################################################################################################
+def get_total_salary(consultantsList):
+    consultantDict = {}
+    count = len(consultantsList)
+
+    #Build mapping of consultant to salary
+    db = fb_hr.database()
+    db_entry = db.child("employees").get()
+    for e in db_entry.each():
+        consultantDict[e.val()["name"]] = int(e.val()["salary"])
+
+    #Find the corresponding consultants and sum up their total salary
+    salary = 0
+    for c in consultantsList:
+        print("consultant: ", c, " salary = ", consultantDict[c])
+        salary += consultantDict[c]
+        count -= 1
+
+    #Error check to make sure we got all consultants
+    if count is not 0:
+        return -1
+    
+    return salary
+#######################################################################################################################
+
+#######################################################################################################################
+## Helper function called by add_tender to compute the total cost of the tender
+def get_cost(consultantsList, expenseList):
+    totalCost = 0
+    consultants = consultantsList.split(',')
+    expenses = expenseList.split(',')
+    count = 1
+    #Sum up expenses for the tender
+    for e in expenses:
+        print("count = ", count, " expense = ", e)
+        if count == 2:
+            # totalCost += expense['amt']
+            totalCost += int(e)
+            count -= 1
+        else:
+            count += 1
+
+    #Sum up consultant costs
+    consultantCost = get_total_salary(consultants)
+    print("get_cost: consultantCost = ", consultantCost)
+    totalCost += consultantCost
+    
+    return str(totalCost)
+#######################################################################################################################
+
+
 
 
 @app.route('/trendline', methods=['GET'])

@@ -60,7 +60,7 @@ class CRM(object):
             "Category ": "Welfare",
             "Contact Details": "647-378-4809",
             "Date Joined": "01/04/2019",
-            "Main Contact Name": "Blah Ablah",
+            "Main Contact Name": "Nick Fury",
             "Name": name,
             "Province": "ON",
             "Size": "123",

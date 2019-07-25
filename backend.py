@@ -169,7 +169,7 @@ def add_tender():
     #     else:
     #         entry['consultants']['member' + str(counter)] = c
     #     counter += 1
-    #entry['contact'] = 
+    # entry['contact'] =
     #entry['contact']['email'] = contact_email
     #entry['contact']['name'] = contact_name
     #entry['currency'] = currency
@@ -344,6 +344,7 @@ def query():
     return returnVal
 #######################################################################################################################
 
+
 #######################################################################################################################
 """ API endpoint to get a inference on probability of tender acceptance """
 @app.route('/tenders/predict', methods=['GET'])
@@ -377,6 +378,7 @@ def pred_tender_acceptance():
     return prob
 #######################################################################################################################
 
+
 #######################################################################################################################
 """ Trigger retrain of our model """
 # VOID FUNCTION
@@ -391,6 +393,7 @@ def retrain():
 
     model.retrain_model(historical, clients)
 #######################################################################################################################
+
 
 #######################################################################################################################
 """ Trigger retrain of our model """
@@ -479,34 +482,36 @@ def get_total_salary(consultantsList):
     consultantDict = {}
     count = len(consultantsList)
 
-    #Build mapping of consultant to salary
+    # Build mapping of consultant to salary
     db = fb_hr.database()
     db_entry = db.child("employees").get()
     for e in db_entry.each():
         consultantDict[e.val()["name"]] = int(e.val()["salary"])
 
-    #Find the corresponding consultants and sum up their total salary
+    # Find the corresponding consultants and sum up their total salary
     salary = 0
     for c in consultantsList:
         print("consultant: ", c, " salary = ", consultantDict[c])
         salary += consultantDict[c]
         count -= 1
 
-    #Error check to make sure we got all consultants
+    # Error check to make sure we got all consultants
     if count is not 0:
         return -1
-    
+
     return salary
 #######################################################################################################################
 
 #######################################################################################################################
-## Helper function called by add_tender to compute the total cost of the tender
+# Helper function called by add_tender to compute the total cost of the tender
+
+
 def get_cost(consultantsList, expenseList):
     totalCost = 0
     consultants = consultantsList.split(',')
     expenses = expenseList.split(',')
     count = 1
-    #Sum up expenses for the tender
+    # Sum up expenses for the tender
     for e in expenses:
         print("count = ", count, " expense = ", e)
         if count == 2:
@@ -516,15 +521,13 @@ def get_cost(consultantsList, expenseList):
         else:
             count += 1
 
-    #Sum up consultant costs
+    # Sum up consultant costs
     consultantCost = get_total_salary(consultants)
     print("get_cost: consultantCost = ", consultantCost)
     totalCost += consultantCost
-    
+
     return totalCost
 #######################################################################################################################
-
-
 
 
 @app.route('/trendline', methods=['GET'])
@@ -547,6 +550,19 @@ def save_rfp():
         uuid).update({'price': price, 'status': 'new'})
 
     return jsonify({'accepted': res})
+
+
+@app.route('/tenders/get', methods=['GET'])
+# EXAMPLE:  /tenders/get?uuid=-Lk_XvhvXN7ylLWfH3Zq&field=cost
+def get_field():
+    db = fb.database()
+
+    uuid = request.args.get('uuid', None)
+    field = request.args.get('field', 'cost')
+
+    res = dict(db.child("tenders").child("active").child(
+        uuid).get().val())
+    return str(res[field])
 
 
 if __name__ == '__main__':

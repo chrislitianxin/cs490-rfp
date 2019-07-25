@@ -42,7 +42,7 @@ class Model(object):
 
         # flatten the list
         prob = flatmap(list.__add__, prob)
-        prob = [min(5/(1+math.e**(-(i/10-5)))+p, 1)
+        prob = [1-min(5/(1+math.e**(-(i/10-5)))+p, 1)
                 for i, p in enumerate(prob)]
 
         return jsonify(prob)

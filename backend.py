@@ -379,7 +379,7 @@ def pred_tender_acceptance():
 
     # udpate the probability field upon every query to predict probability
     db.child("tenders").child("active").child(
-        uuid).update({"prob_accept": str(prob)})
+        uuid).update({"prob_accept": str(prob.data)[2:-3]})
 
     return prob
 #######################################################################################################################

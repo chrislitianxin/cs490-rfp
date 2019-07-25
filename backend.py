@@ -343,15 +343,21 @@ def query():
 @app.route('/tenders/predict', methods=['GET'])
 def pred_tender_acceptance():
     "Given RFP_ID, return the probability of acceptance of a tender"
-    rfp_id = request.args.get('id', None)
-    if not rfp_id:
-        return "RFP not found"
+    uuid = str(request.args.get('uuid', None))
+    if not uuid:
+        return "Invalid UUID"
     db = fb.database()
 
     # get rfp info
-    rfp_key, rfp_info = db.child("tenders").child("active").order_by_child(
-        "tender_id").equal_to(rfp_id).get().val().popitem(last=False)
-    print(rfp_info['consultants'])
+    # rfp_key, rfp_info = db.child("tenders").child("active").order_by_child(
+    #     "tender_id").equal_to(rfp_id).get().val().popitem(last=False)
+    try:
+        rfp_info = dict(db.child("tenders").child(
+            "active").child(uuid).get().val())
+
+    except AttributeError as e:
+        return 'Tender not found, try change UUID'
+
     # get client info
     client_name = rfp_info['client_name']
     client_info = crm_fb.get_client_info(client_name)
@@ -448,16 +454,15 @@ def tender_active_to_historical():
 #######################################################################################################################
 
 #######################################################################################################################
-@app.route('/cosmin', methods=['POST'])
+@app.route('/cosmin', methods=['GET', 'POST'])
 def cosmin_test():
     req = request.json
     print(req)
     #req = request.form.to_dict(flat=False)
     db = fb.database()
- 
-    db.child("tenders").child("active").push(req)
 
-    return jsonify(req)
+    res = db.child("tenders").child("active").push(req)
+    return res['name']
 #######################################################################################################################
 
 
@@ -466,7 +471,7 @@ def trendline():
     tl = [(random.randrange(5, 10)*i, random.randrange(5, 10) * i)
           for i in range(12)]
     res = list(zip(*tl))
-    return jsonify(res)
+    return jsonify({'accepted': res})
 
 
 if __name__ == '__main__':

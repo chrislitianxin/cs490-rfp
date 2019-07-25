@@ -23,21 +23,21 @@ class CRM(object):
     def get_client_info(self, client_name):
         "Quering client info by client name"
         db = self.crm.database()
-
+        print(client_name)
         try:
             # query crm db for client infomation
             client = db.child("clients").order_by_child(
                 "Name").equal_to(client_name).get().val()
             _, client_info = client.popitem(last=False)
 
-            return client_info
+        except Exception:
+            client_info = self.get_default_client_info()
 
-        except IndexError as err:
-            return self.get_default_client_info()
+        return client_info
 
     def get_default_client_info(self):
         _, client = self.crm.database().child("clients").order_by_child(
-            "Name").equal_to('rfp-test').get().val().popitem(last=False)
+            "Name").equal_to('Canada Compassion').get().val().popitem(last=False)
         return client
 
     def get_all_clients_info(self):

@@ -33,7 +33,7 @@ config_HR = {
     "appId": "1:307067666683:web:39e93a69988eacbc"
 }
 
-#fb = Firebase(config)
+# fb = Firebase(config)
 fb = pyrebase.initialize_app(config_RFP)
 
 fb_hr = pyrebase.initialize_app(config_HR)
@@ -75,7 +75,7 @@ Tender Entry SCHEMA:
     "location":{
         "city":"Toronto",
         "country":"Canada",
-        #Region can be "Atlantic Canada" || "Ontario" || "Quebec" || "Western Canada"
+        # Region can be "Atlantic Canada" || "Ontario" || "Quebec" || "Western Canada"
         "region":"Ontario"
     },
     "price":150000,
@@ -364,9 +364,9 @@ def pred_tender_acceptance():
 
     prob = model.pred_probability(client_info, rfp_info)
 
-    # update record probability
-    # db.child("tenders").child("active").child(
-    #     rfp_key).update({"prob_accept": prob})
+    # udpate the probability field upon every query to predict probability
+    db.child("tenders").child("active").child(
+        uuid).update({"prob_accept": prob})
 
     return prob
 
@@ -458,7 +458,7 @@ def tender_active_to_historical():
 def cosmin_test():
     req = request.json
     print(req)
-    #req = request.form.to_dict(flat=False)
+    # req = request.form.to_dict(flat=False)
     db = fb.database()
 
     res = db.child("tenders").child("active").push(req)
@@ -471,6 +471,20 @@ def trendline():
     tl = [(random.randrange(5, 10)*i, random.randrange(5, 10) * i)
           for i in range(12)]
     res = list(zip(*tl))
+    return jsonify({'accepted': res})
+
+
+@app.route('/tenders/save', methods=['GET'])
+# EXAMPLE:  /tenders/save?uuid=-Lk_46zS_7e0riw7YqLB&price=54321
+def save_rfp():
+    db = fb.database()
+
+    uuid = request.args.get('uuid', None)
+    price = request.args.get('price', None)
+
+    res = db.child("tenders").child("active").child(
+        uuid).update({'price': price, 'status': 'new'})
+
     return jsonify({'accepted': res})
 
 

@@ -19,7 +19,7 @@ def flatmap(func, iterable):
 
 class Model(object):
     """ Loading our ML model and run inferences.
-        EXAMPLE: http://localhost:8000/tenders/predict?id=RFP-12345
+        EXAMPLE: http://localhost:8000/tenders/predict?uuid=
     """
 
     def __init__(self, path, *args, **kwargs):
@@ -32,9 +32,7 @@ class Model(object):
         company_size = int(client_info["Size"])
         # rfp_price = rfp_info["price"]
         rfp_num_consultants = len(rfp_info["consultants"])
-        # TODO
-        cost = 10000
-        margin = 0.3
+        cost = int(rfp_info["cost"])
 
         # features for prediction
         features = [[company_assets, company_size, rfp_num_consultants,

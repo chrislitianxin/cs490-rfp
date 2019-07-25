@@ -498,7 +498,7 @@ def get_total_salary(consultantsList):
     salary = 0
     for c in consultantsList:
         print("consultant: ", c, " salary = ", consultantDict[c])
-        salary += consultantDict[c]
+        salary += consultantDict[c] * 168
         count -= 1
 
     # Error check to make sure we got all consultants

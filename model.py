@@ -6,6 +6,7 @@ from sklearn import preprocessing, decomposition, model_selection, metrics, pipe
 from sklearn.metrics import log_loss
 from flask import jsonify
 import itertools
+import math
 
 
 """ HELPER FUNCTION
@@ -38,8 +39,11 @@ class Model(object):
         features = [[company_assets, company_size, rfp_num_consultants,
                      cost, m/100, cost * (1+m/100)] for m in range(0, 100, 1)]
         prob = self.model.predict_proba(features)[..., :1].tolist()
+
         # flatten the list
         prob = flatmap(list.__add__, prob)
+        prob = [min(5/(1+math.e**(-(i/10-5)))+p, 1)
+                for i, p in enumerate(prob)]
 
         return jsonify(prob)
 
